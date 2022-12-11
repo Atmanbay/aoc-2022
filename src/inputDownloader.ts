@@ -1,5 +1,6 @@
 import axios from "axios";
-import * as dotenv from "dotenv"; // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
+import * as dotenv from "dotenv";
+import fs from "fs";
 dotenv.config();
 
 export const downloadInput = async ({
@@ -9,6 +10,11 @@ export const downloadInput = async ({
   year: string;
   day: string;
 }) => {
+  const filePath = `src/inputs/${day}`;
+  if (fs.existsSync(filePath)) {
+    return fs.readFileSync(filePath, "utf-8");
+  }
+
   const url = `https://adventofcode.com/${year}/day/${day}/input`;
   const response = await axios.get(url, {
     headers: {
@@ -22,5 +28,9 @@ export const downloadInput = async ({
     },
   });
 
-  return response.data as string;
+  const data = response.data as string;
+
+  fs.writeFileSync(filePath, data, { flag: "w" });
+
+  return data;
 };
